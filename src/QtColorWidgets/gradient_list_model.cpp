@@ -47,6 +47,21 @@ public:
         background.setTexture(QPixmap(QStringLiteral(":/color_widgets/alphaback.png")));
     }
 
+    int gradient_column()
+    {
+        return 0;
+    }
+
+    int name_column()
+    {
+        return last_column();
+    }
+
+    int last_column()
+    {
+        return edit_mode == EditBoth ? 1 : 0;
+    }
+
     int find(const QString& name)
     {
         for ( int i = 0; i < gradients.size(); i++ )
@@ -153,8 +168,7 @@ bool color_widgets::GradientListModel::setGradient(int index, const QGradientSto
         return false;
 
     d->gradients[index].gradient.setStops(gradient_stops);
-    QModelIndex mindex = createIndex(index, 0);
-    Q_EMIT dataChanged(mindex, mindex, {Qt::DecorationRole, Qt::ToolTipRole});
+    Q_EMIT dataChanged(createIndex(index, 0), createIndex(index, d->last_column()), {Qt::DecorationRole, Qt::ToolTipRole});
     return true;
 }
 
@@ -226,15 +240,19 @@ QVariant color_widgets::GradientListModel::data ( const QModelIndex& index, int 
     switch( role )
     {
         case Qt::DisplayRole:
-            return gradient.name;
+            if ( index.column() == d->name_column() )
+                return gradient.name;
+            return {};
         case Qt::DecorationRole:
-            return d->preview(gradient.gradient);
+            if ( index.column() == d->gradient_column() )
+                return d->preview(gradient.gradient);
+            return {};
         case Qt::ToolTipRole:
             return tr("%1 (%2 colors)").arg(gradient.name).arg(gradient.gradient.stops().size());
         case Qt::EditRole:
-            if ( d->edit_mode == EditGradient )
+            if ( d->edit_mode == EditGradient || (d->edit_mode == EditBoth && index.column() == d->gradient_column()) )
                 return QBrush(gradient.gradient);
-            else if ( d->edit_mode == EditName )
+            else if ( d->edit_mode == EditName || (d->edit_mode == EditBoth && index.column() == d->name_column()) )
                 return gradient.name;
             return {};
     }
@@ -247,9 +265,8 @@ bool color_widgets::GradientListModel::rename(int index, const QString& new_name
     if ( !d->acceptable(index) || d->contains(new_name) )
         return false;
 
-    QModelIndex mindex = createIndex(index, 0);
     d->gradients[index].name = new_name;
-    Q_EMIT dataChanged(mindex, mindex, {Qt::DisplayRole, Qt::ToolTipRole});
+    Q_EMIT dataChanged(createIndex(index, 0), createIndex(index, d->last_column()), {Qt::DisplayRole, Qt::ToolTipRole});
     return true;
 }
 
@@ -277,10 +294,11 @@ bool color_widgets::GradientListModel::setData(const QModelIndex& index, const Q
     }
     else if ( role == Qt::EditRole )
     {
-        if ( d->edit_mode == EditName )
+        if ( d->edit_mode == EditName || (d->edit_mode == EditBoth && index.column() == d->name_column()) )
+        {
             return rename(index.row(), value.toString());
-
-        if ( d->edit_mode == EditGradient )
+        }
+        else if ( d->edit_mode == EditGradient || (d->edit_mode == EditBoth && index.column() == d->gradient_column()) )
         {
             const QGradient* grad = value.value<QBrush>().gradient();
             if ( !grad )
@@ -299,7 +317,33 @@ color_widgets::GradientListModel::ItemEditMode color_widgets::GradientListModel:
 
 void color_widgets::GradientListModel::setEditMode(color_widgets::GradientListModel::ItemEditMode mode)
 {
-    d->edit_mode = mode;
-    Q_EMIT editModeChanged(mode);
+    if ( mode != d->edit_mode )
+    {
+        int columns = 0;
+
+        if ( mode == EditBoth )
+        {
+            columns = 1;
+            beginInsertColumns({}, 1, 1);
+        }
+        else if ( d->edit_mode == EditBoth )
+        {
+            columns = -1;
+            beginRemoveColumns({}, 1, 1);
+        }
+
+        d->edit_mode = mode;
+        Q_EMIT editModeChanged(mode);
+
+        if ( columns > 0 )
+            endInsertColumns();
+        else if ( columns < 0 )
+            endRemoveColumns();
+    }
 }
 
+
+int color_widgets::GradientListModel::columnCount(const QModelIndex&) const
+{
+    return d->edit_mode == EditBoth ? 2 : 1;
+}

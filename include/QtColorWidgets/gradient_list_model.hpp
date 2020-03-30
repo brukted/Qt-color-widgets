@@ -47,6 +47,7 @@ public:
         EditNone = 0,
         EditName,
         EditGradient,
+        EditBoth,
     };
 
     Q_ENUM(ItemEditMode);
@@ -57,6 +58,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
     Qt::ItemFlags flags(const QModelIndex & index) const Q_DECL_OVERRIDE;
     bool setData(const QModelIndex & index, const QVariant & value, int role) Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex & parent) const Q_DECL_OVERRIDE;
 
     QSize iconSize() const;
 

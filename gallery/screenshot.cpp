@@ -165,10 +165,14 @@ int main(int argc, char *argv[])
     editor.setStops(gradient_colors);
     screenshot(editor);
 
-    QComboBox gradient_list;
     color_widgets::GradientListModel gradient_model;
     gradient_model.setGradient("Rainbow", gradient_colors);
     gradient_model.setGradient("Black to Transparent", QGradientStops{{0, Qt::black}, {1, QColor(0, 0, 0, 0)}});
+//     gradient_model.setEditMode(color_widgets::GradientListModel::EditName);
+//     gradient_model.setEditMode(color_widgets::GradientListModel::EditGradient);
+    gradient_model.setEditMode(color_widgets::GradientListModel::EditBoth);
+
+    QComboBox gradient_list;
     gradient_list.setModel(&gradient_model);
     gradient_model.setIconSize(QSize(128, 24));
     gradient_list.setIconSize(gradient_model.iconSize());
@@ -177,13 +181,11 @@ int main(int argc, char *argv[])
     gradient_list.resize(gradient_list.sizeHint());
     screenshot(gradient_list, "GradientListModel_combo");
 
-    QListView gradient_view;
+    QTableView gradient_view;
     color_widgets::GradientDelegate gradient_delegate;
     gradient_view.setItemDelegate(&gradient_delegate);
     gradient_view.setModel(&gradient_model);
-//     gradient_model.setEditMode(color_widgets::GradientListModel::EditName);
-    gradient_model.setEditMode(color_widgets::GradientListModel::EditGradient);
-    gradient_view.resize(QSize(gradient_view.sizeHintForColumn(0) + 4, gradient_view.sizeHint().height()));
+//     gradient_view.resize(QSize(gradient_view.sizeHintForColumn(0) + 4, gradient_view.sizeHint().height()));
     screenshot(gradient_view, "GradientListModel_view");
 
     color_widgets::HarmonyColorWheel harwheel;
