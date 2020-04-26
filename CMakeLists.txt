@@ -169,3 +169,8 @@ if (${QTCOLORWIDGETS_DESIGNER_PLUGIN})
         add_subdirectory (color_widgets_designer_plugin)
     endif(Qt5Designer_FOUND)
 endif()
+
+option(QTCOLORWIDGETS_PYTHON "Build python module" OFF)
+if (${QTCOLORWIDGETS_PYTHON})
+    add_subdirectory(python)
+endif()

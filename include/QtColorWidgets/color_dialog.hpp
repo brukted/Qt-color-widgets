@@ -92,6 +92,18 @@ public:
     ColorWheel::ColorSpaceEnum colorSpace() const;
     bool wheelRotating() const;
 
+    void _fucking_python_bindings_show()
+    {
+        return show();
+    }
+
+    qint64 _fucking_python_bindings_get_color()
+    {
+        if  ( exec() )
+            return color().rgba();
+        return -1;
+    }
+
 public Q_SLOTS:
 
     /**

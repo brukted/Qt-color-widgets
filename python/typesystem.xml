@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<typesystem package="py_color_widgets">
+<!--     <load-typesystem name="typesystem_widgets.xml" generate="no"/> -->
+    <primitive-type name="QColor"/>
+    <primitive-type name="qint64"/>
+    <namespace-type name="color_widgets" generate="no">
+        <object-type name="ColorDialog">
+            <modify-function signature="_fucking_python_bindings_show()" rename="show" />
+            <modify-function signature="_fucking_python_bindings_get_color()" rename="get_color" />
+
+        </object-type>
+    </namespace-type>
+</typesystem>
