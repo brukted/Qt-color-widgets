@@ -25,6 +25,7 @@
 
 
 #include "color_wheel.hpp"
+#include <stdexcept>
 
 namespace color_widgets {
 
